@@ -1,9 +1,35 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Home, Mic, Compass, BookOpen, Settings, LayoutDashboard, Target } from 'lucide-react';
+import { Home, Mic, Compass, BookOpen, Settings, LayoutDashboard, Target, Layers, X } from 'lucide-react';
 import { FloatingChatbot } from '@/components/FloatingChatbot';
+import { motion, AnimatePresence } from 'motion/react';
+import { COMPLETE_FEATURES } from '@/lib/featuresData';
+import { useAuth } from '@/app/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const { user, isLoading, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/auth');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <div className="w-8 h-8 border-2 border-accent border-t-white/10 rounded-full animate-spin" />
+        <p className="text-white/50 text-sm">Authenticating session...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-background text-foreground font-body overflow-hidden">
       
@@ -28,21 +54,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                <Mic className="w-5 h-5 group-hover:text-accent transition-colors" />
                <span className="font-medium hidden lg:block">Mock Simulator</span>
              </Link>
+             <button onClick={() => setIsFeaturesOpen(true)} className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors group">
+               <Layers className="w-5 h-5 group-hover:text-accent transition-colors" />
+               <span className="font-medium hidden lg:block text-left text-sm">All AI Features</span>
+             </button>
              <Link href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors group opacity-50 cursor-not-allowed">
                <Compass className="w-5 h-5 group-hover:text-accent transition-colors" />
-               <span className="font-medium hidden lg:block">Career Path</span>
+               <span className="font-medium hidden lg:block text-sm">Career Path</span>
              </Link>
              <Link href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors group opacity-50 cursor-not-allowed">
                <BookOpen className="w-5 h-5 group-hover:text-accent transition-colors" />
-               <span className="font-medium hidden lg:block">Study Resources</span>
+               <span className="font-medium hidden lg:block text-sm">Study Resources</span>
              </Link>
           </div>
         </div>
         
-        <div className="p-4 border-t border-white/5">
-           <button className="flex items-center justify-center lg:justify-start gap-3 w-full px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors group">
-             <Settings className="w-5 h-5 group-hover:text-accent transition-colors" />
-             <span className="font-medium hidden lg:block">Settings</span>
+        <div className="p-4 border-t border-white/5 flex flex-col gap-3">
+           <div className="flex items-center gap-3 px-4 py-2 opacity-80">
+              <div className="w-8 h-8 rounded-full bg-accent/20 flex shrink-0 items-center justify-center text-accent font-bold">
+                 {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="hidden lg:block overflow-hidden">
+                 <p className="text-sm font-medium text-white truncate w-full pr-2">{user.name}</p>
+                 <p className="text-xs text-white/50 truncate w-full pr-2">{user.role}</p>
+              </div>
+           </div>
+           <button onClick={logout} className="flex items-center justify-center lg:justify-start gap-3 w-full px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-400/10 transition-colors group">
+             <Settings className="w-5 h-5 group-hover:text-red-400 transition-colors" />
+             <span className="font-medium hidden lg:block text-sm">Logout</span>
            </button>
         </div>
       </nav>
@@ -59,6 +98,68 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </main>
 
       <FloatingChatbot />
+
+      {/* Global Slide-Over Features Panel */}
+      <AnimatePresence>
+        {isFeaturesOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex justify-end"
+          >
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" 
+              onClick={() => setIsFeaturesOpen(false)}
+            />
+            
+            {/* Sliding Panel */}
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-md h-full bg-background border-l border-white/10 shadow-2xl flex flex-col z-50"
+            >
+               {/* Panel Header */}
+               <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5 backdrop-blur-md">
+                 <div>
+                   <h2 className="text-xl font-display text-white">AI Tools Hub</h2>
+                   <p className="text-sm text-white/50">Select a specialized module</p>
+                 </div>
+                 <button 
+                   onClick={() => setIsFeaturesOpen(false)}
+                   className="p-2 hover:bg-white/10 rounded-full text-white/70 transition-colors"
+                 >
+                   <X className="w-5 h-5" />
+                 </button>
+               </div>
+
+               {/* Panel Content (Scrollable Features List) */}
+               <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                 {COMPLETE_FEATURES.map((feat, i) => (
+                    <Link 
+                      key={i} 
+                      href={feat.href} 
+                      onClick={() => setIsFeaturesOpen(false)}
+                      className="group liquid-glass p-4 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-accent/20 transition-all flex items-start gap-4"
+                    >
+                      <div className="w-10 h-10 shrink-0 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-accent/20 transition-colors border border-white/5">
+                        {feat.icon && React.cloneElement(feat.icon as React.ReactElement, { className: 'w-5 h-5 text-accent' })}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-white text-sm mb-1">{feat.title}</h3>
+                        <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{feat.description}</p>
+                      </div>
+                    </Link>
+                 ))}
+               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

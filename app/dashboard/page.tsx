@@ -6,7 +6,8 @@ import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis 
 } from 'recharts';
 import { 
-  Trophy, TrendingUp, AlertTriangle, CheckCircle2, Star, Target, BookOpen, Clock, Activity, Zap, Mic, Sparkles
+  Trophy, TrendingUp, AlertTriangle, CheckCircle2, Star, Target, BookOpen, Clock, Activity, Zap, Mic, Sparkles,
+  FileText, MessageSquare, PhoneCall, Video, Map, BarChart as BarChartIcon, LineChart as LineChartIcon, Bot, UserCheck, Building, Lightbulb, PenTool, Globe, BrainCircuit, Briefcase, Cpu
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -38,6 +39,8 @@ const recentMocks = [
   { id: 2, role: 'React Developer', date: 'Yesterday', score: 72, feedback: 'Good technical knowledge, improved pacing needed.', status: 'good' },
   { id: 3, role: 'Full Stack Engineer', date: 'Last Week', score: 55, feedback: 'Struggled with database indexing concepts.', status: 'needs_work' },
 ];
+
+import { COMPLETE_FEATURES } from '@/lib/featuresData';
 
 export default function AnalyticsDashboard() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -72,7 +75,7 @@ export default function AnalyticsDashboard() {
           <motion.p initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay:0.2}} className="text-white/60 mt-2">Your interview readiness has increased by 12% this week.</motion.p>
         </div>
         <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} transition={{delay:0.3}}>
-          <Link href="/dashboard/session" className="bg-accent hover:bg-accent/90 text-black px-6 py-3 rounded-xl font-medium shadow-[0_0_20px_rgba(var(--color-accent),0.3)] transition-all inline-flex items-center gap-2">
+          <Link href="/dashboard/session" className="bg-accent hover:bg-accent/90 text-white px-6 py-3 rounded-xl font-medium shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all inline-flex items-center gap-2">
             <Mic className="w-4 h-4" /> Start Mock Interview
           </Link>
         </motion.div>
@@ -80,7 +83,7 @@ export default function AnalyticsDashboard() {
 
       {/* 1. TOP SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <SummaryCard title="Resume Score" value="92/100" icon={<FileTextIcon/>} delay={0.1} trend="+5%" color="border-accent" glow="rgba(var(--color-accent), 0.5)"/>
+        <SummaryCard title="Resume Score" value="92/100" icon={<FileText />} delay={0.1} trend="+5%" color="border-blue-500" glow="rgba(59, 130, 246, 0.5)"/>
         <SummaryCard title="Avg. Mock Score" value="78/100" icon={<Activity/>} delay={0.2} trend="+12%" color="border-blue-400" glow="rgba(96, 165, 250, 0.5)" />
         <SummaryCard title="Readiness Level" value="Advanced" icon={<Target/>} delay={0.3} trend="Top 15%" color="border-purple-400" glow="rgba(192, 132, 252, 0.5)" />
         <SummaryCard title="Current Streak" value="7 Days" icon={<Zap/>} delay={0.4} trend="1,400 XP" color="border-yellow-400" glow="rgba(250, 204, 21, 0.5)" />
@@ -102,13 +105,14 @@ export default function AnalyticsDashboard() {
                  <defs>
                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                      <stop offset="5%" stopColor="rgb(var(--color-accent))" stopOpacity={0.3}/>
-                     <stop offset="95%" stopColor="rgb(var(--color-accent))" stopOpacity={0}/>
+                     <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                    </linearGradient>
                  </defs>
                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={12} tickLine={false} axisLine={false}/>
                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={12} tickLine={false} axisLine={false}/>
                  <Tooltip contentStyle={{backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px'}} />
-                 <Area type="monotone" dataKey="score" stroke="rgb(var(--color-accent))" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                 <Area type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
                </AreaChart>
              </ResponsiveContainer>
            </div>
@@ -123,7 +127,7 @@ export default function AnalyticsDashboard() {
                  <XAxis type="number" hide />
                  <YAxis dataKey="name" type="category" stroke="rgba(255,255,255,0.6)" fontSize={12} tickLine={false} axisLine={false} interval={0} />
                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px'}}/>
-                 <Bar dataKey="value" fill="rgb(var(--color-accent))" radius={[0, 4, 4, 0]}>
+                 <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]}>
                    {skillsData.map((entry, index) => (
                      <Cell key={`cell-${index}`} fill={entry.value < 50 ? '#f87171' : entry.value < 75 ? '#fbbf24' : '#4ade80'} />
                    ))}
@@ -278,10 +282,8 @@ function SparkleIcon() {
   );
 }
 
-function FileTextIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-  );
+function LayersIcon() {
+  return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></svg>;
 }
 
 function SummaryCard({ title, value, icon, delay, trend, color, glow }: any) {

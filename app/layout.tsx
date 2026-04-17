@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import { Inter, Instrument_Serif } from 'next/font/google';
 import './globals.css'; // Global styles
+import { ClientProviders } from './ClientProviders';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -22,7 +23,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSerif.variable} dark`}>
       <body suppressHydrationWarning className="antialiased min-h-screen">
-        {children}
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

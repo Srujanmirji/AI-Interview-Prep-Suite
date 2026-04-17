@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send, Bot, User, Layers } from 'lucide-react';
+import { Send, Bot, User, Layers, Volume2 } from 'lucide-react';
 import { generateContent } from '@/app/actions/gemini';
 
 export default function FeatureChat({ title }: { title: string }) {
@@ -11,6 +11,30 @@ export default function FeatureChat({ title }: { title: string }) {
   }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const playTTS = async (text: string) => {
+    try {
+      setIsSpeaking(true);
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      if (res.ok) {
+        const audioBlob = await res.blob();
+        const url = URL.createObjectURL(audioBlob);
+        const audio = new Audio(url);
+        audio.onended = () => setIsSpeaking(false);
+        await audio.play();
+      } else {
+        setIsSpeaking(false);
+      }
+    } catch (e) {
+      console.error(e);
+      setIsSpeaking(false);
+    }
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +55,12 @@ user: ${userMessage}
 Please provide a highly professional, accurate, and structured response acting as the AI module for ${title}. Do not use pleasantries if the user asks for a generation (e.g. if they ask for a cover letter, just give the cover letter).`;
       
       const response = await generateContent(prompt);
-      setMessages(prev => [...prev, { role: 'bot', text: response || 'Failed to process request.' }]);
+      const botResponse = response || 'Failed to process request.';
+      setMessages(prev => [...prev, { role: 'bot', text: botResponse }]);
+
+      if (title.toLowerCase().includes('voice')) {
+         playTTS(botResponse);
+      }
     } catch (error) {
       setMessages(prev => [...prev, { role: 'bot', text: 'Sorry, I encountered an error connecting to the AI system.' }]);
     } finally {
@@ -46,8 +75,15 @@ Please provide a highly professional, accurate, and structured response acting a
         {messages.map((msg, i) => (
           <div key={i} className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'bot' && (
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex flex-shrink-0 items-center justify-center border border-accent/20">
-                <Bot className="w-4 h-4 text-accent" />
+              <div className="w-8 h-8 rounded-full bg-accent/20 flex flex-shrink-0 items-center justify-center border border-accent/20 relative">
+                 {isSpeaking && i === messages.length - 1 ? (
+                    <>
+                      <Volume2 className="w-4 h-4 text-accent animate-pulse" />
+                      <div className="absolute inset-0 bg-accent/20 rounded-full animate-ping" />
+                    </>
+                 ) : (
+                    <Bot className="w-4 h-4 text-accent" />
+                 )}
               </div>
             )}
             <div className={`p-4 rounded-xl max-w-[80%] whitespace-pre-wrap text-sm leading-relaxed ${

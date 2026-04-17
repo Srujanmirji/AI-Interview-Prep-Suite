@@ -189,10 +189,10 @@ export default function LandingPage() {
               <button className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">About</button>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/dashboard" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              <Link href="/auth" className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 Login
               </Link>
-              <Link href="/dashboard" className="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground cursor-pointer hover:scale-[1.03] transition-transform flex items-center gap-2 border border-white/5">
+              <Link href="/auth" className="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground cursor-pointer hover:scale-[1.03] transition-transform flex items-center gap-2 border border-white/5">
                 Get Started
               </Link>
             </div>
@@ -213,12 +213,13 @@ export default function LandingPage() {
             
             <div className="flex flex-col items-center gap-6 mt-12 animate-fade-rise-delay-2 w-full sm:w-auto">
               <div className="flex flex-col gap-4">
-                <LiquidButton className="w-72">
-                  <Link href="/dashboard" className="flex items-center justify-center gap-3 w-full">
-                    <Github className="w-5 h-5" />
-                    Login
-                  </Link>
-                </LiquidButton>
+                <Link href="/auth" className="w-72 inline-block">
+                  <LiquidButton className="w-full">
+                    <span className="flex items-center justify-center w-full">
+                      Login
+                    </span>
+                  </LiquidButton>
+                </Link>
                 <button 
                   onClick={() => setShowSignup(!showSignup)} 
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -236,11 +237,13 @@ export default function LandingPage() {
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <LiquidButton className="w-72">
-                      <Link href="/dashboard" className="flex items-center justify-center w-full">
-                        Sign up
-                      </Link>
-                    </LiquidButton>
+                    <Link href="/auth" className="w-72 inline-block">
+                      <LiquidButton className="w-full">
+                        <span className="flex items-center justify-center w-full">
+                          Sign up
+                        </span>
+                      </LiquidButton>
+                    </Link>
                   </motion.div>
                 )}
               </AnimatePresence>

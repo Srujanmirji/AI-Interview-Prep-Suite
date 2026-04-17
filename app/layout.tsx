@@ -4,13 +4,13 @@ import './globals.css'; // Global styles
 
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-body',
+  variable: '--font-sans',
 });
 
 const instrumentSerif = Instrument_Serif({
   weight: '400',
   subsets: ['latin'],
-  variable: '--font-display',
+  variable: '--font-serif',
 });
 
 export const metadata: Metadata = {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, voiceId = "pNInz6obpgDQGcFmaJcg" } = await req.json(); // Adam voice by default
+    const { text, voiceId = "21m00Tcm4TlvDq8ikWAM" } = await req.json(); // Rachel voice by default (Standard Free Tier)
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_monolingual_v1",
+        model_id: "eleven_multilingual_v2",
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75,

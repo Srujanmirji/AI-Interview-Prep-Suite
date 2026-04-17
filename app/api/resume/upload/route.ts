@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 });
-    }
-
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -16,54 +9,73 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
+    // 1. Extract plain text from PDF Buffer using dynamic require to bypass Next.js compilation caching
+    const pdfParse = require('pdf-parse');
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const base64Data = buffer.toString('base64');
+    const pdfData = await pdfParse(buffer);
+    const resumeText = pdfData.text;
 
-    const prompt = `
-      You are an expert technical recruiter and resume extractor.
-      Extract information from the provided resume PDF.
-      
-      Output MUST be a valid JSON object with the following structure:
-      {
-        "atsScore": 90, 
-        "name": "Jane Doe",
-        "role": "Current or Target Role",
-        "experience": [
-          {
-            "company": "Company Name",
-            "title": "Role Title",
-            "date": "Date Range",
-            "bullets": ["Action-oriented bullet point with metrics..."]
-          }
-        ],
-        "skills": ["Skill 1", "Skill 2"]
-      }
-      
-      Do not include any markdown backticks in the final output, just raw JSON.
-    `;
+    // 2. Safely parse via Groq Llama 3 API using known-good quota
+    const groqApiKey = process.env.GROQ_API_KEY || "";
+    if (!groqApiKey) throw new Error("Missing GROQ_API_KEY in server environment.");
 
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash-lite',
-      generationConfig: { responseMimeType: 'application/json' }
+    const promptText = `
+You are an expert technical recruiter and resume extractor.
+Extract information exactly from the provided resume text below.
+
+RESUME TEXT:
+"""
+${resumeText.substring(0, 5000)}
+"""
+
+You MUST output EXACTLY and ONLY a raw JSON object. No markdown wrappers.
+Use this structure:
+{
+  "atsScore": 90, 
+  "name": "Extracted Name",
+  "role": "Current or Target Role",
+  "experience": [
+    {
+      "company": "Company Name",
+      "title": "Role Title",
+      "date": "Date Range",
+      "bullets": ["Bullet 1", "Bullet 2"]
+    }
+  ],
+  "skills": ["Skill 1", "Skill 2"]
+}
+`;
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${groqApiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: promptText }],
+        temperature: 0.1,
+      })
     });
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type || 'application/pdf'
-        }
-      }
-    ]);
+    if (!response.ok) {
+       throw new Error("Groq API Error");
+    }
 
-    const textResponse = result.response.text() || "{}";
-    const parsed = JSON.parse(textResponse);
-
+    const jsonRes = await response.json();
+    let responseText = jsonRes.choices[0].message.content;
+    
+    // Indestructible JSON extraction
+    const match = responseText.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("No JSON found");
+    
+    const parsed = JSON.parse(match[0]);
     return NextResponse.json(parsed);
+
   } catch (error) {
-    console.error('Error processing resume:', error);
+    console.error('Error processing resume via Groq:', error);
     return NextResponse.json({ error: 'Failed to process resume' }, { status: 500 });
   }
 }

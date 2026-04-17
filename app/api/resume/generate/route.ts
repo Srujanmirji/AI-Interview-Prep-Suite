@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 });
-    }
+    const groqApiKey = process.env.GROQ_API_KEY || "";
+    if (!groqApiKey) throw new Error("Missing GROQ_API_KEY in server environment.");
 
     const body = await request.json();
     const { firstName, lastName, role, experience, skills } = body;
 
-    const prompt = `
+    const promptText = `
       You are an expert technical recruiter and resume writer. 
       Given the following details from a candidate, generate an ATS-optimized resume.
       
@@ -41,16 +37,33 @@ export async function POST(request: NextRequest) {
       Do not include any markdown backticks in the final output, just raw JSON.
     `;
 
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash-lite',
-      generationConfig: { responseMimeType: 'application/json' }
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${groqApiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: promptText }],
+        temperature: 0.3,
+      })
     });
 
-    const result = await model.generateContent(prompt);
-    const textResponse = result.response.text() || "{}";
-    const parsed = JSON.parse(textResponse);
+    if (!response.ok) {
+       throw new Error("Groq API Error");
+    }
 
+    const jsonRes = await response.json();
+    let responseText = jsonRes.choices[0].message.content;
+    
+    // Indestructible JSON extraction
+    const match = responseText.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("No JSON found");
+    
+    const parsed = JSON.parse(match[0]);
     return NextResponse.json(parsed);
+
   } catch (error) {
     console.error('Error generating resume:', error);
     return NextResponse.json({ error: 'Failed to generate resume' }, { status: 500 });

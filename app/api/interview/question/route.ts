@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 });
-    }
+    const groqApiKey = process.env.GROQ_API_KEY || "";
+    if (!groqApiKey) throw new Error("Missing GROQ_API_KEY in server environment.");
 
     const body = await request.json();
     const { role, step, previousQuestions } = body;
 
-    const prompt = `
+    const promptText = `
       You are an expert technical interviewer for a top-tier tech company.
       The candidate is applying for the role of: ${role || 'Software Engineer'}.
       This is question number ${step + 1} of the interview.
@@ -26,10 +22,27 @@ export async function POST(request: NextRequest) {
       Output ONLY the text of the question, no introductory text.
     `;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
-    const result = await model.generateContent(prompt);
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${groqApiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: promptText }],
+        temperature: 0.7,
+      })
+    });
 
-    return NextResponse.json({ question: result.response.text() });
+    if (!response.ok) {
+       throw new Error("Groq API Error");
+    }
+
+    const jsonRes = await response.json();
+    let responseText = jsonRes.choices[0].message.content;
+
+    return NextResponse.json({ question: responseText });
   } catch (error) {
     console.error('Error generating question:', error);
     return NextResponse.json({ error: 'Failed to generate question' }, { status: 500 });

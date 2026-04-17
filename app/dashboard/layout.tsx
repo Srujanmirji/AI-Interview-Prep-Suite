@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                <Compass className="w-5 h-5 group-hover:text-accent transition-colors" />
                <span className="font-medium hidden lg:block text-sm">Career Path</span>
              </Link>
-             <Link href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors group opacity-50 cursor-not-allowed">
+             <Link href="/dashboard/study" className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors group">
                <BookOpen className="w-5 h-5 group-hover:text-accent transition-colors" />
                <span className="font-medium hidden lg:block text-sm">Study Resources</span>
              </Link>

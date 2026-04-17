@@ -79,7 +79,15 @@ export default function UnifiedDashboard() {
         method: 'POST',
         body: formData
       });
-      const data = await res.json();
+      
+      const textRes = await res.text();
+      let data;
+      try {
+        data = JSON.parse(textRes);
+      } catch (err) {
+        throw new Error("Server crashed or returned HTML. You likely need to completely restart your Next.js dev server because we just installed pdf-parse. Error snippet: " + textRes.substring(0, 50));
+      }
+
       if (!data.error) {
         setResumeResult(data);
         
@@ -97,11 +105,11 @@ export default function UnifiedDashboard() {
         setFlowState('interview');
         fetchNextQuestion([]); // Kick off first question
       } else {
-        alert("Error parsing resume.");
+        alert("Resume Error: " + data.error);
       }
     } catch (error) {
       console.error(error);
-      alert("Error parsing resume.");
+      alert("Resume Error: " + String(error));
     } finally {
       setIsUploadingResume(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -161,7 +169,7 @@ export default function UnifiedDashboard() {
     }
   };
 
-  const handleDownloadResume = () => {
+  const handleDownloadResume = async () => {
     if (!resumeResult) return;
 
     let skillsString = 'None specified';
@@ -171,37 +179,81 @@ export default function UnifiedDashboard() {
       skillsString = resumeResult.skills;
     }
 
-    let expString = '';
-    if (resumeResult.experience && Array.isArray(resumeResult.experience)) {
-      expString = resumeResult.experience.map((exp: any) => {
-         const title = exp.title || 'Role';
-         const company = exp.company || 'Company';
-         const date = exp.date ? ` (${exp.date})` : '';
-         const bullets = Array.isArray(exp.bullets) ? exp.bullets.map((b: string) => `  - ${b}`).join('\n') : '';
-         return `${title} at ${company}${date}\n${bullets}`;
-      }).join('\n\n');
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      // Candidate Name & Role
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(24);
+      doc.text(resumeResult.name || 'Candidate', 20, 30);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(14);
+      doc.setTextColor(100);
+      doc.text((resumeResult.role || 'Not specified').toUpperCase(), 20, 42);
+
+      // Skills Section
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(0);
+      doc.text("SKILLS & TECHNOLOGIES", 20, 60);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(50);
+      const splitSkills = doc.splitTextToSize(skillsString, 170);
+      doc.text(splitSkills, 20, 68);
+
+      let yPos = 68 + (splitSkills.length * 6) + 12;
+      
+      // Experience Section
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(0);
+      doc.text("PROFESSIONAL EXPERIENCE", 20, yPos);
+      yPos += 10;
+
+      if (resumeResult.experience && Array.isArray(resumeResult.experience)) {
+        resumeResult.experience.forEach((exp: any) => {
+           const title = exp.title || 'Role';
+           const company = exp.company || 'Company';
+           const date = exp.date ? `  |  ${exp.date}` : '';
+           
+           if (yPos > 270) { doc.addPage(); yPos = 25; }
+
+           doc.setFont("helvetica", "bold");
+           doc.setFontSize(12);
+           doc.setTextColor(20);
+           doc.text(`${title} at ${company}${date}`, 20, yPos);
+           yPos += 7;
+
+           doc.setFont("helvetica", "normal");
+           doc.setFontSize(10);
+           doc.setTextColor(60);
+           
+           if (Array.isArray(exp.bullets)) {
+             exp.bullets.forEach((bullet: string) => {
+                const bulletLines = doc.splitTextToSize(`• ${bullet}`, 165);
+                if (yPos + (bulletLines.length * 5) > 280) { doc.addPage(); yPos = 25; }
+                doc.text(bulletLines, 25, yPos);
+                yPos += (bulletLines.length * 5) + 3;
+             });
+           } else if (typeof exp.bullets === 'string') {
+                const bulletLines = doc.splitTextToSize(exp.bullets, 165);
+                if (yPos + (bulletLines.length * 5) > 280) { doc.addPage(); yPos = 25; }
+                doc.text(bulletLines, 25, yPos);
+                yPos += (bulletLines.length * 5) + 3;
+           }
+           yPos += 6; // Spacing between jobs
+        });
+      }
+
+      doc.save(`${(resumeResult.name || 'Candidate').replace(/\s+/g, '_')}_AIOptimized_Resume.pdf`);
+    } catch (err) {
+      console.error("PDF Generation failed:", err);
+      alert("Failed to generate PDF. Make sure the development server has restarted after installation.");
     }
-
-    const fullText = `
-NAME: ${resumeResult.name || 'Candidate'}
-TARGET ROLE: ${resumeResult.role || 'Not specified'}
-
-SKILLS
-${skillsString}
-
-EXPERIENCE
-${expString}
-    `.trim();
-
-    const blob = new Blob([fullText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${(resumeResult.name || 'Candidate').replace(/\s+/g, '_')}_Resume_Optimized.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   // Calculate aggregated score

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,12 +26,10 @@ export async function POST(request: NextRequest) {
       Output ONLY the text of the question, no introductory text.
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
+    const result = await model.generateContent(prompt);
 
-    return NextResponse.json({ question: response.text });
+    return NextResponse.json({ question: result.response.text() });
   } catch (error) {
     console.error('Error generating question:', error);
     return NextResponse.json({ error: 'Failed to generate question' }, { status: 500 });

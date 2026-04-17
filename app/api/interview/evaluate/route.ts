@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,15 +34,13 @@ export async function POST(request: NextRequest) {
       Do not include any markdown backticks in the final output, just raw JSON.
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-      }
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.5-flash-lite',
+      generationConfig: { responseMimeType: 'application/json' }
     });
 
-    const textResponse = response.text || "{}";
+    const result = await model.generateContent(prompt);
+    const textResponse = result.response.text() || "{}";
     const parsed = JSON.parse(textResponse);
 
     return NextResponse.json(parsed);

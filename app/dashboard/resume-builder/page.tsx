@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileText, Wand2, Download, Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { FileText, Wand2, Download, Plus, CheckCircle2 } from 'lucide-react';
 
 export default function ResumeBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<any>(null);
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [role, setRole] = useState('');
-  const [experience, setExperience] = useState('Software Engineer @ TechCorp\nDeveloped scalable React applications...');
+  const [firstName, setFirstName] = useState('Sai');
+  const [lastName, setLastName] = useState('Doe');
+  const [role, setRole] = useState('Senior Frontend Engineer');
+  const [experience, setExperience] = useState('Developed scalable React applications...');
   const [skills, setSkills] = useState('React, TypeScript, Next.js, Node.js');
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -42,7 +42,7 @@ export default function ResumeBuilder() {
     <div className="space-y-8 animate-fade-rise max-w-4xl mx-auto">
       <div>
         <h1 className="text-3xl font-display font-medium">AI Resume Builder</h1>
-        <p className="text-muted-foreground mt-1">Generate an ATS-friendly resume tailored to your target role using Gemini 2.5 Flash.</p>
+        <p className="text-muted-foreground mt-1">Generate an ATS-friendly resume tailored to your target role.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -63,6 +63,7 @@ export default function ResumeBuilder() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="font-medium">Experience</h3>
+                <button type="button" className="text-xs text-accent hover:underline flex items-center gap-1"><Plus className="w-3 h-3"/> Add</button>
               </div>
               <div className="bg-background p-4 rounded-lg border border-border space-y-3">
                 <textarea rows={5} required value={experience} onChange={e => setExperience(e.target.value)} className="w-full bg-transparent resize-none text-sm text-muted-foreground focus:outline-none focus:text-foreground" />

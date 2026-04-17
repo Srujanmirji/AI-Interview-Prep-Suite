@@ -16,102 +16,122 @@ const COMPLETE_FEATURES = [
   {
     title: "AI Resume Builder",
     description: "Generate ATS-friendly resumes optimized for your target roles in seconds.",
-    icon: <FileText className="w-7 h-7 text-foreground" />
+    icon: <FileText className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/resume-builder"
   },
   {
     title: "Resume vs Job Matcher",
     description: "Upload job descriptions to precisely map your skill gaps and missing keywords.",
-    icon: <Target className="w-7 h-7 text-foreground" />
+    icon: <Target className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/resume-vs-job-matcher"
   },
   {
     title: "AI Interview Q&A Generator",
     description: "Generate custom tailored questions and expert model answers for any role.",
-    icon: <MessageSquare className="w-7 h-7 text-foreground" />
+    icon: <MessageSquare className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/ai-interview-q-a-generator"
   },
   {
     title: "Mock Interview Simulator",
     description: "Experience genuine speaking pressure with highly realistic conversational AI.",
-    icon: <Mic className="w-7 h-7 text-foreground" />
+    icon: <Mic className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/interview"
   },
   {
     title: "Voice-Based Interview",
     description: "Conduct hands-free, conversational phone-screen style interviews seamlessly.",
-    icon: <PhoneCall className="w-7 h-7 text-foreground" />
+    icon: <PhoneCall className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/voice-based-interview"
   },
   {
     title: "AI Video Interview Analyzer",
     description: "Real-time analysis of your facial expressions, posture, and eye contact.",
-    icon: <Video className="w-7 h-7 text-foreground" />
+    icon: <Video className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/ai-video-interview-analyzer"
   },
   {
     title: "Real-Time Speaking Coach",
     description: "Get instant live feedback on your pacing, filler words, and vocal tone.",
-    icon: <Activity className="w-7 h-7 text-foreground" />
+    icon: <Activity className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/real-time-speaking-coach"
   },
   {
     title: "Study Concepts & Roadmap",
     description: "Receive personalized technical study plans tailored to your exact timeline.",
-    icon: <Map className="w-7 h-7 text-foreground" />
+    icon: <Map className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/study-concepts-roadmap"
   },
   {
     title: "Skill Gap Analyzer",
     description: "Identify missing vital qualifications and discover resources to obtain them.",
-    icon: <BarChart className="w-7 h-7 text-foreground" />
+    icon: <BarChart className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/skill-gap-analyzer"
   },
   {
     title: "Performance Dashboard",
     description: "Track your weaknesses and get actionable progress visualizations weekly.",
-    icon: <LineChart className="w-7 h-7 text-foreground" />
+    icon: <LineChart className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/performance-dashboard"
   },
   {
     title: "Gamification System",
     description: "Earn XP, maintain daily prep streaks, and unlock badges to stay motivated.",
-    icon: <Trophy className="w-7 h-7 text-foreground" />
+    icon: <Trophy className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/gamification-system"
   },
   {
     title: "AI Career Assistant Chatbot",
     description: "Ask any career or interview question and get expert, contextual advice 24/7.",
-    icon: <Bot className="w-7 h-7 text-foreground" />
+    icon: <Bot className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/ai-career-assistant-chatbot"
   },
   {
     title: "AI Mentor Mode",
     description: "Get guided, step-by-step coaching for difficult algorithms and concepts.",
-    icon: <UserCheck className="w-7 h-7 text-foreground" />
+    icon: <UserCheck className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/ai-mentor-mode"
   },
   {
     title: "Company-Specific Interview Prep",
     description: "Practice with custom tailored questions asked by FAANG and top tech companies.",
-    icon: <Building className="w-7 h-7 text-foreground" />
+    icon: <Building className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/company-specific-interview-prep"
   },
   {
     title: "AI Project Idea Generator",
     description: "Brainstorm unique, impressive side projects to add substantial weight to your portfolio.",
-    icon: <Lightbulb className="w-7 h-7 text-foreground" />
+    icon: <Lightbulb className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/ai-project-idea-generator"
   },
   {
     title: "AI Cover Letter Generator",
     description: "Instantly draft highly compelling cover letters precisely tailored to the job description.",
-    icon: <PenTool className="w-7 h-7 text-foreground" />
+    icon: <PenTool className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/ai-cover-letter-generator"
   },
   {
     title: "Multi-Language Support",
     description: "Practice your interviews comfortably in English, Hindi, Kannada, and more local dialects.",
-    icon: <Globe className="w-7 h-7 text-foreground" />
+    icon: <Globe className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/multi-language-support"
   },
   {
     title: "Smart Revision Mode",
     description: "Use intelligent spaced repetition and auto-generated AI flashcards for your weakest topics.",
-    icon: <BrainCircuit className="w-7 h-7 text-foreground" />
+    icon: <BrainCircuit className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/smart-revision-mode"
   },
   {
     title: "Recruiter Simulation Mode",
     description: "Experience tough, stress-inducing behavioral questions from a simulated hiring manager.",
-    icon: <Briefcase className="w-7 h-7 text-foreground" />
+    icon: <Briefcase className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/recruiter-simulation-mode"
   },
   {
     title: "Memory-Based Learning AI",
     description: "An adaptive AI that specifically remembers your past mistakes and adjusts its questions.",
-    icon: <Cpu className="w-7 h-7 text-foreground" />
+    icon: <Cpu className="w-7 h-7 text-foreground" />,
+    href: "/dashboard/feature/memory-based-learning-ai"
   }
 ];
 
@@ -251,8 +271,9 @@ export default function LandingPage() {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.3, delay: i * 0.05 }}
                     key={feat.title} 
-                    className="liquid-glass p-8 rounded-3xl group hover:bg-white/5 transition-colors box-border border-white/5"
+                    className="liquid-glass rounded-3xl group hover:bg-white/5 transition-colors box-border border-white/5"
                   >
+                    <Link href={feat.href} className="p-8 block w-full h-full">
                     <div className="mb-6 p-3 bg-white/5 w-fit rounded-2xl group-hover:bg-white/10 transition-colors">
                       {feat.icon}
                     </div>
@@ -260,6 +281,7 @@ export default function LandingPage() {
                     <p className="text-muted-foreground text-sm leading-relaxed">
                       {feat.description}
                     </p>
+                    </Link>
                   </motion.div>
                 ))}
               </AnimatePresence>

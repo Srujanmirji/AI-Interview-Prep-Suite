@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_turbo_v2_5",
+        model_id: "eleven_monolingual_v1",
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75,
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
         const err = await response.text();
         console.error("Elevenlabs Error:", err);
-        return NextResponse.json({ error: "Failed to fetch from ElevenLabs" }, { status: response.status });
+        return NextResponse.json({ error: err }, { status: response.status });
     }
 
     return new NextResponse(response.body, {

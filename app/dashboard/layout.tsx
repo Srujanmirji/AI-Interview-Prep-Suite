@@ -6,30 +6,9 @@ import { Home, Mic, Compass, BookOpen, Settings, LayoutDashboard, Target, Layers
 import { FloatingChatbot } from '@/components/FloatingChatbot';
 import { motion, AnimatePresence } from 'motion/react';
 import { COMPLETE_FEATURES } from '@/lib/featuresData';
-import { useAuth } from '@/app/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
-  const { user, isLoading, logout } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, isLoading, router]);
-
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <div className="w-8 h-8 border-2 border-accent border-t-white/10 rounded-full animate-spin" />
-        <p className="text-white/50 text-sm">Authenticating session...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen bg-background text-foreground font-body overflow-hidden">
       
@@ -69,19 +48,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         
-        <div className="p-4 border-t border-white/5 flex flex-col gap-3">
-           <div className="flex items-center gap-3 px-4 py-2 opacity-80">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex shrink-0 items-center justify-center text-accent font-bold">
-                 {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="hidden lg:block overflow-hidden">
-                 <p className="text-sm font-medium text-white truncate w-full pr-2">{user.name}</p>
-                 <p className="text-xs text-white/50 truncate w-full pr-2">{user.role}</p>
-              </div>
-           </div>
-           <button onClick={logout} className="flex items-center justify-center lg:justify-start gap-3 w-full px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-400/10 transition-colors group">
-             <Settings className="w-5 h-5 group-hover:text-red-400 transition-colors" />
-             <span className="font-medium hidden lg:block text-sm">Logout</span>
+        <div className="p-4 border-t border-white/5">
+           <button className="flex items-center justify-center lg:justify-start gap-3 w-full px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors group">
+             <Settings className="w-5 h-5 group-hover:text-accent transition-colors" />
+             <span className="font-medium hidden lg:block">Settings</span>
            </button>
         </div>
       </nav>

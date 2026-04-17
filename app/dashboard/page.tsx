@@ -1,348 +1,311 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { 
+  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis 
+} from 'recharts';
+import { 
+  Trophy, TrendingUp, AlertTriangle, CheckCircle2, Star, Target, BookOpen, Clock, Activity, Zap, Mic, Sparkles
+} from 'lucide-react';
 import Link from 'next/link';
-import { BrainCircuit, FileText, Mic, Send, Github, CheckCircle2, Download, Trophy, AlertCircle, RefreshCw } from 'lucide-react';
 
-type FlowState = 'resume' | 'interview' | 'feedback';
+// Mock Data
+const progressData = [
+  { name: 'W1', score: 45 },
+  { name: 'W2', score: 55 },
+  { name: 'W3', score: 68 },
+  { name: 'W4', score: 62 },
+  { name: 'W5', score: 75 },
+  { name: 'W6', score: 85 },
+];
 
-export default function UnifiedDashboard() {
-  const [flowState, setFlowState] = useState<FlowState>('resume');
-  
-  // Progress Strip
-  const maxQuestions = 5;
+const skillsData = [
+  { name: 'DSA', value: 70 },
+  { name: 'System Design', value: 45 },
+  { name: 'React', value: 90 },
+  { name: 'Node.js', value: 65 },
+  { name: 'Communication', value: 80 },
+];
 
-  // --- Resume State ---
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [role, setRole] = useState('');
-  const [skills, setSkills] = useState('');
-  const [isGeneratingResume, setIsGeneratingResume] = useState(false);
-  const [resumeResult, setResumeResult] = useState<any>(null);
+const pieData = [
+  { name: 'Strengths', value: 65, color: '#4ade80' },
+  { name: 'Weaknesses', value: 35, color: '#f87171' },
+];
 
-  // --- Interview State ---
-  const [interviewStep, setInterviewStep] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState("Click 'Start Interview' to begin.");
-  const [previousQuestions, setPreviousQuestions] = useState<string[]>([]);
-  const [userAnswer, setUserAnswer] = useState("");
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  const [isLoadingQuestion, setIsLoadingQuestion] = useState(false);
-  const [interviewResults, setInterviewResults] = useState<any[]>([]);
+const recentMocks = [
+  { id: 1, role: 'Senior Frontend Engineer', date: 'Today', score: 85, feedback: 'Great communication, needs work on system design basics.', status: 'excellent' },
+  { id: 2, role: 'React Developer', date: 'Yesterday', score: 72, feedback: 'Good technical knowledge, improved pacing needed.', status: 'good' },
+  { id: 3, role: 'Full Stack Engineer', date: 'Last Week', score: 55, feedback: 'Struggled with database indexing concepts.', status: 'needs_work' },
+];
 
-  const handleStartSession = () => {
-    setFlowState('resume');
-    setFirstName(''); setLastName(''); setRole(''); setSkills('');
-    setResumeResult(null);
-    setInterviewStep(0);
-    setCurrentQuestion("Click 'Start Interview' to begin.");
-    setPreviousQuestions([]);
-    setUserAnswer("");
-    setInterviewResults([]);
-  };
+export default function AnalyticsDashboard() {
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const handleGenerateResume = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsGeneratingResume(true);
-    try {
-      const res = await fetch('/api/resume/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, role, experience: "Draft experience based on role", skills })
-      });
-      const data = await res.json();
-      if (!data.error) {
-        setResumeResult(data);
-        setFlowState('interview');
-        fetchNextQuestion([]); // Kick off first question
-      } else {
-        alert("Error generating resume.");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsGeneratingResume(false);
-    }
-  };
+  useEffect(() => {
+    // Simulate data loading animation
+    const t = setTimeout(() => setIsLoaded(true), 800);
+    return () => clearTimeout(t);
+  }, []);
 
-  const fetchNextQuestion = async (history: string[]) => {
-    setIsLoadingQuestion(true);
-    try {
-      const res = await fetch('/api/interview/question', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: role || 'Software Engineer', step: interviewStep, previousQuestions: history })
-      });
-      const data = await res.json();
-      if (data.question) {
-        setCurrentQuestion(data.question);
-        setPreviousQuestions([...history, data.question]);
-      }
-    } catch (e) {
-      console.error(e);
-      setCurrentQuestion("Failed to load question.");
-    } finally {
-      setIsLoadingQuestion(false);
-    }
-  };
-
-  const handleSubmitAnswer = async () => {
-    if (!userAnswer.trim()) return;
-    setIsEvaluating(true);
-    
-    try {
-      const res = await fetch('/api/interview/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: currentQuestion, answer: userAnswer })
-      });
-      const data = await res.json();
-      
-      if (!data.error) {
-        setInterviewResults(prev => [...prev, data]);
-        
-        const nextStep = interviewStep + 1;
-        setInterviewStep(nextStep);
-        setUserAnswer("");
-        
-        if (nextStep >= maxQuestions) {
-          setFlowState('feedback');
-        } else {
-          fetchNextQuestion(previousQuestions);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsEvaluating(false);
-    }
-  };
-
-  // Calculate aggregated score
-  const averageScore = interviewResults.length > 0 
-    ? Math.round(interviewResults.reduce((acc, curr) => acc + (curr.pacingScore || 80), 0) / interviewResults.length)
-    : 0;
+  if (!isLoaded) {
+    return (
+      <div className="h-full w-full flex flex-col items-center justify-center text-white/50 gap-4">
+         <div className="w-10 h-10 border-4 border-white/10 border-t-accent rounded-full animate-spin" />
+         <span className="text-sm font-medium animate-pulse">AI is compiling your analytics...</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen relative flex flex-col font-body text-foreground overflow-hidden">
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
       
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <video autoPlay loop muted playsInline className="w-full h-full object-cover opacity-30 mix-blend-screen">
-          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-3xl pointer-events-none" />
-        <div className="absolute inset-0 radar-grid opacity-10 pointer-events-none" />
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-white/5 pb-8">
+        <div>
+          <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-medium mb-4">
+            <SparkleIcon /> Level 12 AI Builder
+          </motion.div>
+          <motion.h1 initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay:0.1}} className="text-4xl font-display font-medium text-white tracking-tight">
+            Welcome back, Srujan
+          </motion.h1>
+          <motion.p initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay:0.2}} className="text-white/60 mt-2">Your interview readiness has increased by 12% this week.</motion.p>
+        </div>
+        <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} transition={{delay:0.3}}>
+          <Link href="/dashboard/session" className="bg-accent hover:bg-accent/90 text-black px-6 py-3 rounded-xl font-medium shadow-[0_0_20px_rgba(var(--color-accent),0.3)] transition-all inline-flex items-center gap-2">
+            <Mic className="w-4 h-4" /> Start Mock Interview
+          </Link>
+        </motion.div>
       </div>
 
-      {/* 1. TOP BAR */}
-      <header className="relative z-10 w-full border-b border-white/5 bg-white/5 backdrop-blur-md px-6 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-2 text-xl font-bold font-display cursor-pointer hover:text-accent transition-colors text-white">
-          <BrainCircuit className="w-6 h-6 text-accent" />
-          AIPS
-        </Link>
-        <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10">
-            <Github className="w-4 h-4" /> Connect GitHub
-          </button>
-          <button onClick={handleStartSession} className="bg-accent text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20">
-            Start New Session
-          </button>
-        </div>
-      </header>
+      {/* 1. TOP SUMMARY CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <SummaryCard title="Resume Score" value="92/100" icon={<FileTextIcon/>} delay={0.1} trend="+5%" color="border-accent" glow="rgba(var(--color-accent), 0.5)"/>
+        <SummaryCard title="Avg. Mock Score" value="78/100" icon={<Activity/>} delay={0.2} trend="+12%" color="border-blue-400" glow="rgba(96, 165, 250, 0.5)" />
+        <SummaryCard title="Readiness Level" value="Advanced" icon={<Target/>} delay={0.3} trend="Top 15%" color="border-purple-400" glow="rgba(192, 132, 252, 0.5)" />
+        <SummaryCard title="Current Streak" value="7 Days" icon={<Zap/>} delay={0.4} trend="1,400 XP" color="border-yellow-400" glow="rgba(250, 204, 21, 0.5)" />
+      </div>
 
-      {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col max-w-[1400px] w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 2. PERFORMANCE ANALYTICS */}
+        <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:0.5}} className="lg:col-span-2 liquid-glass p-6 rounded-3xl border border-white/5 space-y-6">
+           <div className="flex justify-between items-center">
+             <h2 className="text-xl font-display text-white flex items-center gap-2"><TrendingUp className="w-5 h-5 text-accent"/> Progress Over Time</h2>
+             <select className="bg-black/50 border border-white/10 rounded-lg px-3 py-1 text-sm text-white focus:outline-none">
+               <option>Last 6 Weeks</option>
+               <option>Last 6 Months</option>
+             </select>
+           </div>
+           <div className="h-[250px] w-full">
+             <ResponsiveContainer width="100%" height="100%">
+               <AreaChart data={progressData}>
+                 <defs>
+                   <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                     <stop offset="5%" stopColor="rgb(var(--color-accent))" stopOpacity={0.3}/>
+                     <stop offset="95%" stopColor="rgb(var(--color-accent))" stopOpacity={0}/>
+                   </linearGradient>
+                 </defs>
+                 <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={12} tickLine={false} axisLine={false}/>
+                 <YAxis stroke="rgba(255,255,255,0.2)" fontSize={12} tickLine={false} axisLine={false}/>
+                 <Tooltip contentStyle={{backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px'}} />
+                 <Area type="monotone" dataKey="score" stroke="rgb(var(--color-accent))" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+               </AreaChart>
+             </ResponsiveContainer>
+           </div>
+        </motion.div>
+
+        {/* SKILLS RADAR / BAR */}
+        <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:0.6}} className="liquid-glass p-6 rounded-3xl border border-white/5 space-y-6">
+           <h2 className="text-xl font-display text-white">Skill Breakdown</h2>
+           <div className="h-[250px] w-full">
+             <ResponsiveContainer width="100%" height="100%">
+               <BarChart data={skillsData} layout="vertical" margin={{top: 0, right: 0, left: 30, bottom: 0}}>
+                 <XAxis type="number" hide />
+                 <YAxis dataKey="name" type="category" stroke="rgba(255,255,255,0.6)" fontSize={12} tickLine={false} axisLine={false} interval={0} />
+                 <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px'}}/>
+                 <Bar dataKey="value" fill="rgb(var(--color-accent))" radius={[0, 4, 4, 0]}>
+                   {skillsData.map((entry, index) => (
+                     <Cell key={`cell-${index}`} fill={entry.value < 50 ? '#f87171' : entry.value < 75 ? '#fbbf24' : '#4ade80'} />
+                   ))}
+                 </Bar>
+               </BarChart>
+             </ResponsiveContainer>
+           </div>
+        </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Progress Strip */}
-        <div className="flex justify-center mb-8">
-          <div className="liquid-glass rounded-full px-6 py-3 flex items-center gap-4 sm:gap-8 border border-white/10 shadow-lg text-sm sm:text-base font-medium text-white/60">
-            <div className={`flex items-center gap-2 transition-colors ${flowState === 'resume' ? 'text-accent' : flowState !== 'resume' ? 'text-green-400' : ''}`}>
-              {flowState !== 'resume' ? <CheckCircle2 className="w-5 h-5"/> : <span className="w-5 h-5 rounded-full border-2 border-accent flex items-center justify-center text-[10px]">1</span>}
-              Resume
-            </div>
-            <div className="w-8 h-[1px] bg-white/20" />
-            <div className={`flex items-center gap-2 transition-colors ${flowState === 'interview' ? 'text-accent' : flowState === 'feedback' ? 'text-green-400' : ''}`}>
-               {flowState === 'feedback' ? <CheckCircle2 className="w-5 h-5"/> : <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[10px] ${flowState === 'interview' ? 'border-accent text-accent' : 'border-white/30 text-white/30'}`}>2</span>}
-              Interview {flowState === 'interview' ? `${interviewStep + 1}/${maxQuestions}` : ''}
-            </div>
-            <div className="w-8 h-[1px] bg-white/20" />
-            <div className={`flex items-center gap-2 transition-colors ${flowState === 'feedback' ? 'text-accent' : ''}`}>
-               <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[10px] ${flowState === 'feedback' ? 'border-accent text-accent' : 'border-white/30 text-white/30'}`}>3</span>
-              Score
-            </div>
-          </div>
-        </div>
-
-        {/* 2. MAIN GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[600px]">
+        {/* 3. SKILL GAP & WEAKNESS PANEL */}
+        <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:0.7}} className="liquid-glass p-6 rounded-3xl border border-red-500/20 space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 blur-[50px]" />
+          <h2 className="text-xl font-display text-white flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-red-400"/> Skill Gaps Identified</h2>
           
-          {/* CARD 1: Resume Builder */}
-          <div className={`liquid-glass rounded-3xl border ${flowState === 'resume' ? 'border-accent/50 shadow-[0_0_30px_rgba(var(--color-accent),0.1)]' : 'border-white/5 opacity-60'} p-6 sm:p-8 flex flex-col transition-all duration-500`}>
-            <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-              <FileText className={`w-6 h-6 ${flowState === 'resume' ? 'text-accent' : 'text-white/40'}`} />
-              <h2 className="text-xl font-display font-medium text-white">Resume Builder</h2>
+          <div className="space-y-4">
+             <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex gap-3">
+               <div className="mt-0.5"><div className="w-2 h-2 rounded-full bg-red-400" /></div>
+               <div>
+                 <p className="text-sm font-medium text-red-200">System Design (Databases)</p>
+                 <p className="text-xs text-red-200/70 mt-1">Struggled with scaling SQL databases in Mock #3.</p>
+               </div>
+             </div>
+             
+             <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl flex gap-3">
+               <div className="mt-0.5"><div className="w-2 h-2 rounded-full bg-yellow-400" /></div>
+               <div>
+                 <p className="text-sm font-medium text-yellow-200">Behavioral Structure</p>
+                 <p className="text-xs text-yellow-200/70 mt-1">Answers lacked the STAR formatting.</p>
+               </div>
+             </div>
+          </div>
+        </motion.div>
+
+        {/* 4. PERSONALIZED STUDY PLAN */}
+        <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:0.8}} className="liquid-glass p-6 rounded-3xl border border-white/5 space-y-6">
+          <h2 className="text-xl font-display text-white flex items-center gap-2"><BookOpen className="w-5 h-5 text-accent"/> AI Study Plan</h2>
+          
+          <div className="space-y-5">
+             <div className="space-y-2">
+               <div className="flex justify-between text-sm">
+                 <span className="text-white/80">React Hooks Mastery</span>
+                 <span className="text-green-400">100%</span>
+               </div>
+               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-green-400 w-full" /></div>
+             </div>
+
+             <div className="space-y-2">
+               <div className="flex justify-between text-sm">
+                 <span className="text-accent font-medium flex items-center gap-1.5"><Star className="w-3 h-3"/> System Design Context</span>
+                 <span className="text-accent">40%</span>
+               </div>
+               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-accent w-[40%] shadow-[0_0_10px_rgba(var(--color-accent),0.8)]" /></div>
+               <p className="text-[10px] text-white/50 pt-1 uppercase tracking-wider">Next Recommended Topic</p>
+             </div>
+
+             <div className="space-y-2">
+               <div className="flex justify-between text-sm">
+                 <span className="text-white/40">Advanced Algorithms</span>
+                 <span className="text-white/40">0%</span>
+               </div>
+               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-white/20 w-[0%]" /></div>
+             </div>
+          </div>
+        </motion.div>
+
+        {/* 5. GAMIFICATION SECTION */}
+        <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:0.9}} className="liquid-glass p-6 rounded-3xl border border-white/5 space-y-6">
+          <h2 className="text-xl font-display text-white flex items-center gap-2"><Trophy className="w-5 h-5 text-yellow-400"/> Gamification</h2>
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-4 border-b border-white/5 pb-6">
+               <div className="relative">
+                 <div className="w-16 h-16 rounded-full border-2 border-dashed border-yellow-400/50 flex items-center justify-center animate-[spin_10s_linear_infinite]" />
+                 <div className="absolute inset-0 flex items-center justify-center font-display font-bold text-2xl text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">12</div>
+               </div>
+               <div>
+                 <p className="text-white font-medium text-lg">Level 12</p>
+                 <p className="text-sm text-white/50">1,400 / 2,000 XP to Level 13</p>
+               </div>
             </div>
             
-            <div className="flex-1 flex flex-col">
-              {!resumeResult ? (
-                <form onSubmit={handleGenerateResume} className="space-y-5 flex-1 flex flex-col">
-                  <div className="space-y-4 flex-1">
-                    <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} disabled={flowState !== 'resume'} placeholder="First Name" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
-                    <input type="text" required value={lastName} onChange={e => setLastName(e.target.value)} disabled={flowState !== 'resume'} placeholder="Last Name" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
-                    <input type="text" required value={role} onChange={e => setRole(e.target.value)} disabled={flowState !== 'resume'} placeholder="Target Role (e.g. Frontend Engineer)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
-                    <textarea rows={3} required value={skills} onChange={e => setSkills(e.target.value)} disabled={flowState !== 'resume'} placeholder="Skills (React, Node, etc.)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 resize-none disabled:opacity-50" />
-                  </div>
-                  <div className="space-y-3 mt-4">
-                    <button type="submit" disabled={flowState !== 'resume' || isGeneratingResume} className="w-full bg-accent text-white py-3 rounded-xl font-medium hover:bg-accent/90 transition-colors flex justify-center items-center gap-2 disabled:opacity-50 group">
-                      {isGeneratingResume ? (
-                        <><RefreshCw className="w-4 h-4 animate-spin"/> AI is generating...</>
-                      ) : (
-                        <>Generate Resume</>
-                      )}
-                    </button>
-                    <button type="button" disabled={flowState !== 'resume'} className="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl font-medium hover:bg-white/10 transition-colors disabled:opacity-50">
-                      Upload Resume (PDF)
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="flex flex-col h-full animate-fade-rise">
-                  <div className="flex-1 bg-white p-6 rounded-xl text-black shadow-inner overflow-hidden relative group">
-                    <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 pointer-events-none" />
-                    <h3 className="font-bold text-lg mb-1">{resumeResult.name}</h3>
-                    <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">{resumeResult.role}</p>
-                    <div className="space-y-2 text-xs text-gray-700">
-                      <p><strong>Skills:</strong> {Array.isArray(resumeResult.skills) ? resumeResult.skills.join(', ') : resumeResult.skills}</p>
-                      <p><strong>Experience:</strong> {resumeResult.experience?.[0]?.title} at {resumeResult.experience?.[0]?.company}</p>
-                      <p className="line-clamp-3 italic text-gray-500 text-[10px]">Preview truncated. Download to see full optimized details.</p>
-                    </div>
-                  </div>
-                  <div className="mt-6 flex justify-between items-center">
-                    <div className="text-green-400 text-sm font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4"/> ATS: {resumeResult.atsScore}/100</div>
-                    <button className="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white transition-colors">
-                      <Download className="w-4 h-4" /> Download
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* CARD 2: Interview Practice */}
-          <div className={`liquid-glass rounded-3xl border ${flowState === 'interview' ? 'border-accent/50 shadow-[0_0_30px_rgba(var(--color-accent),0.1)]' : 'border-white/5 opacity-60'} p-6 sm:p-8 flex flex-col transition-all duration-500`}>
-            <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
-              <div className="flex items-center gap-3">
-                <Mic className={`w-6 h-6 ${flowState === 'interview' ? 'text-accent' : 'text-white/40'}`} />
-                <h2 className="text-xl font-display font-medium text-white">Interview Practice</h2>
+            <div>
+              <p className="text-sm font-medium mb-3 text-white/80">Badges Earned</p>
+              <div className="flex gap-3">
+                 <div className="w-10 h-10 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-400 group relative">
+                   <div className="absolute inset-0 bg-green-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                   React
+                 </div>
+                 <div className="w-10 h-10 rounded-lg bg-accent/20 border border-accent/30 flex items-center justify-center text-accent group relative">
+                   <div className="absolute inset-0 bg-accent/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                   AI
+                 </div>
+                 <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 opacity-50 grayscale hover:grayscale-0 transition-all cursor-not-allowed">
+                   ?
+                 </div>
               </div>
-              {flowState === 'interview' && (
-                <span className="text-xs font-medium bg-white/10 px-3 py-1 rounded-full text-white/80">Q {interviewStep + 1}/{maxQuestions}</span>
-              )}
-            </div>
-
-            <div className="flex-1 flex flex-col justify-between">
-              {flowState === 'resume' ? (
-                <div className="flex-1 flex items-center justify-center text-center text-white/30 text-sm p-6">
-                  Generate your resume first to unlock the tailored interview simulation.
-                </div>
-              ) : flowState === 'feedback' ? (
-                <div className="flex-1 flex items-center justify-center text-center text-green-400 text-sm p-6 flex-col gap-3">
-                  <CheckCircle2 className="w-12 h-12" />
-                  Interview Completed!
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col animate-fade-rise">
-                  <div className="bg-black/30 rounded-xl p-5 border border-white/5 mb-4 relative min-h-[120px] flex items-center">
-                    {isLoadingQuestion ? (
-                       <div className="w-full text-center text-white/50 text-sm flex items-center justify-center gap-2">
-                         <RefreshCw className="w-4 h-4 animate-spin"/> Loading question...
-                       </div>
-                    ) : (
-                      <p className="text-base text-white/90 leading-relaxed">{currentQuestion}</p>
-                    )}
-                  </div>
-                  
-                  <textarea 
-                    value={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                    disabled={isEvaluating || isLoadingQuestion}
-                    placeholder="Type your answer here..."
-                    className="w-full flex-1 bg-black/40 border border-white/10 rounded-xl p-4 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 resize-none disabled:opacity-50"
-                  />
-                  
-                  <div className="mt-4 pt-4 border-t border-white/5">
-                    <button 
-                      onClick={handleSubmitAnswer}
-                      disabled={isEvaluating || !userAnswer.trim() || isLoadingQuestion}
-                      className="w-full bg-accent text-white py-3 rounded-xl font-medium hover:bg-accent/90 transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
-                    >
-                      {isEvaluating ? (
-                        <><RefreshCw className="w-4 h-4 animate-spin"/> Analyzing answer...</>
-                      ) : (
-                        <><Send className="w-4 h-4" /> Submit Answer</>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
+        </motion.div>
+      </div>
 
-          {/* CARD 3: Feedback & Score */}
-          <div className={`liquid-glass rounded-3xl border ${flowState === 'feedback' ? 'border-accent/50 shadow-[0_0_30px_rgba(var(--color-accent),0.1)]' : 'border-white/5 opacity-60'} p-6 sm:p-8 flex flex-col transition-all duration-500`}>
-            <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-              <Trophy className={`w-6 h-6 ${flowState === 'feedback' ? 'text-accent' : 'text-white/40'}`} />
-              <h2 className="text-xl font-display font-medium text-white">Feedback & Score</h2>
+      {/* 6. RECENT ACTIVITY LIST */}
+      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:1.0}}>
+         <h2 className="text-2xl font-display text-white mb-6">Recent Activity</h2>
+         <div className="liquid-glass rounded-3xl border border-white/5 overflow-hidden">
+            <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/5 text-xs font-medium text-white/40 uppercase tracking-widest hidden md:grid">
+               <div className="col-span-4">Role</div>
+               <div className="col-span-2">Date</div>
+               <div className="col-span-2">Score</div>
+               <div className="col-span-4">AI Feedback Summary</div>
             </div>
-
-            <div className="flex-1 flex flex-col">
-              {flowState !== 'feedback' ? (
-                <div className="flex-1 flex items-center justify-center text-center text-white/30 text-sm p-6">
-                  Complete your interview to receive your final score and detailed feedback.
+            <div className="divide-y divide-white/5">
+              {recentMocks.map((mock) => (
+                <div key={mock.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 md:p-6 items-center hover:bg-white/[0.02] transition-colors group">
+                   <div className="col-span-4 font-medium text-white">{mock.role}</div>
+                   <div className="col-span-2 text-sm text-white/50 flex items-center gap-2"><Clock className="w-3 h-3"/>{mock.date}</div>
+                   <div className="col-span-2 font-display text-xl">
+                      <span className={
+                        mock.score >= 80 ? 'text-green-400' : mock.score >= 60 ? 'text-yellow-400' : 'text-red-400'
+                      }>{mock.score}</span><span className="text-sm text-white/20">/100</span>
+                   </div>
+                   <div className="col-span-4 text-sm text-white/60 line-clamp-2 md:line-clamp-1">{mock.feedback}</div>
                 </div>
-              ) : (
-                <div className="flex-1 flex flex-col animate-fade-rise">
-                  <div className="text-center py-6 border-b border-white/5">
-                    <div className="text-5xl font-display font-bold text-white mb-2">{averageScore}</div>
-                    <div className="text-sm uppercase tracking-widest text-accent">Final Score</div>
-                  </div>
-                  
-                  <div className="flex-1 overflow-y-auto py-6 space-y-6 pr-2">
-                    {/* Strengths */}
-                    <div>
-                      <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-400"/> Key Strengths</h4>
-                      <ul className="space-y-2 text-sm text-white/70">
-                        <li className="flex gap-2"><span className="text-accent">•</span> Strong technical accuracy in {role} concepts.</li>
-                        <li className="flex gap-2"><span className="text-accent">•</span> Good pacing overall.</li>
-                      </ul>
-                    </div>
-                    
-                    {/* Improvements */}
-                    <div>
-                      <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2"><AlertCircle className="w-4 h-4 text-yellow-400"/> Areas for Improvement</h4>
-                      <ul className="space-y-3 text-sm text-white/70">
-                        {interviewResults.map((res, idx) => (
-                           <li key={idx} className="bg-black/30 p-3 rounded-lg border border-white/5">
-                             <div className="text-xs text-white/40 mb-1">Q{idx + 1} Feedback</div>
-                             <span className="text-yellow-200 block text-xs">{res.actionableTip || "Try to expand more on your previous experience."}</span>
-                           </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-white/5">
-                    <button onClick={handleStartSession} className="w-full bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-medium transition-colors">
-                      Try Again
-                    </button>
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
-          </div>
+         </div>
+      </motion.div>
+      
+      {/* 7. AI SUGGESTIONS PANEL */}
+      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:1.1}} className="border border-accent/20 bg-accent/5 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+         <div className="absolute inset-0 bg-gradient-to-r from-accent/0 to-accent/10 pointer-events-none" />
+         <div className="flex-1 w-full relative z-10">
+           <h3 className="text-xl font-display text-white mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-accent" /> AI Coach Advice</h3>
+           <p className="text-white/70">"You've been skipping the STAR format in behavioral questions. Practice 2 HR questions today focusing heavily on Action & Result. I also noticed your resume lacks specifics on Docker. If you know it, add it!"</p>
+         </div>
+         <div className="shrink-0 relative z-10 w-full md:w-auto">
+           <button className="w-full md:w-auto px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-medium transition-colors border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)] focus:outline-none">
+             Adopt Suggestions
+           </button>
+         </div>
+      </motion.div>
 
-        </div>
-      </main>
     </div>
+  );
+}
+
+function SparkleIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2v4a3 3 0 0 1-3 3H4v2h4a3 3 0 0 1 3 3v4h2v-4a3 3 0 0 1 3-3h4v-2h-4a3 3 0 0 1-3-3V2h-2Zm8.5 13.5L18 14l-1.5 1.5L15 14l1.5 1.5L15 17l1.5-1.5L18 17l1.5-1.5-.5-.5Zm-14 0L4 14l-1.5 1.5L1 14l1.5 1.5L1 17l1.5-1.5L4 17l1.5-1.5-.5-.5Z"/></svg>
+  );
+}
+
+function FileTextIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+  );
+}
+
+function SummaryCard({ title, value, icon, delay, trend, color, glow }: any) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ delay }}
+      whileHover={{ y: -5 }}
+      style={{ boxShadow: `0 0 0px ${glow}` }}
+      className={`relative group liquid-glass p-6 rounded-3xl border border-white/5 overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_var(--glow)]`}
+    >
+      {/* Dynamic Glow Injector */}
+      <style>{`.group:hover { --glow: ${glow}; }`}</style>
+      
+      <div className={`absolute top-0 right-0 w-24 h-24 blur-[40px] opacity-20 group-hover:opacity-50 transition-opacity bg-current`} style={{color: glow.replace('0.5', '1')}}/>
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border bg-black/40 ${color} shadow-inner`}>
+         {React.cloneElement(icon, { className: 'w-6 h-6 text-white' })}
+      </div>
+      <p className="text-sm text-white/60 mb-1">{title}</p>
+      <h3 className="text-3xl font-display font-medium text-white tracking-tight">{value}</h3>
+      <div className="mt-4 flex items-center gap-2 text-sm font-medium text-white/50">
+        <span className="text-green-400 bg-green-400/10 px-2 py-0.5 rounded text-xs">{trend}</span> since last week
+      </div>
+    </motion.div>
   );
 }

@@ -6,32 +6,66 @@ export async function POST(request: NextRequest) {
     if (!groqApiKey) throw new Error("Missing GROQ_API_KEY in server environment.");
 
     const body = await request.json();
-    const { firstName, lastName, role, experience, skills } = body;
+    const { firstName, lastName, role, experience, skills, education, linkedin, github, details } = body;
+
+    // --- GitHub Pipeline Retrieval ---
+    let githubContext = "None provided.";
+    if (github && typeof github === 'string' && github.trim() !== "") {
+       try {
+          const ghRes = await fetch(`https://api.github.com/users/${github.trim()}/repos?sort=pushed&per_page=4`);
+          if (ghRes.ok) {
+             const repos = await ghRes.json();
+             if (Array.isArray(repos) && repos.length > 0) {
+                githubContext = repos.map((r: any) => `Repo [${r.name}] (${r.language || 'Unknown'}): ${r.description || 'No desc'}`).join(' || ');
+             } else {
+                githubContext = "No public repositories found.";
+             }
+          } else {
+             githubContext = "Could not fetch repos correctly.";
+          }
+       } catch (err) {
+          githubContext = "GitHub fetch error block.";
+       }
+    }
 
     const promptText = `
-      You are an expert technical recruiter and resume writer. 
-      Given the following details from a candidate, generate an ATS-optimized resume.
-      
-      Candidate Details:
-      - Name: ${firstName} ${lastName}
-      - Target Role: ${role}
-      - Skills: ${skills}
-      - Experience / Draft Bullet Points: ${experience}
+You are an expert technical recruiter and resume writer. 
+Generate a JSON resume perfectly formatted and optimized to beat ATS systems for a ${role}.
 
-      Output MUST be a valid JSON object with the following structure:
+Input Data:
+Name: ${firstName} ${lastName}
+Role: ${role}
+Skills: ${skills}
+Experience Profile: ${experience}
+Education Background: ${education || "Not specified."}
+LinkedIn / URLs: ${linkedin || "Not specified."}
+GitHub Public Portfolio: ${githubContext}
+Extra Details/Projects/Context: ${details || "None provided."}
+
+Ensure the generated bullets in the experience section are highly actionable, include metrics if possible, and flow perfectly with the contextual details provided above. Include all of the candidate's custom details and natively parse the GitHub repositories into the 'projects' array effortlessly.
+
+Output your response ONLY as valid, parsable JSON matching this exact structure:
       {
         "atsScore": 95,
         "name": "Jane Doe",
-        "role": "Senior Frontend Engineer",
-        "experience": [
+        "role": "Software Engineer",
+        "linkedin": "https://linkedin.com/in/...",
+        "education": "B.S. in Computer Science - University Name",
+        "skills": ["React", "Node", "TypeScript"],
+        "projects": [
           {
-            "company": "Company Name",
-            "title": "Role Title",
-            "date": "Date Range",
-            "bullets": ["Action-oriented bullet point with metrics..."]
+             "title": "Personal Project / Custom Detail",
+             "description": "Short description of project from extra details."
           }
         ],
-        "skills": ["Skill 1", "Skill 2"]
+        "experience": [
+          {
+             "title": "Software Engineer",
+             "company": "Tech Corp",
+             "date": "2021 - Present",
+             "bullets": ["Did x", "Did y"]
+          }
+        ]
       }
       
       Do not include any markdown backticks in the final output, just raw JSON.

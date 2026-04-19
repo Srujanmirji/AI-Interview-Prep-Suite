@@ -1,17 +1,18 @@
 import React from 'react';
-import { FileText, Target, MessageSquare, Mic, PhoneCall, Video, Activity, Map, BarChart as BarChartIcon, LineChart as LineChartIcon, Trophy, Bot, UserCheck, Building, Lightbulb, PenTool, Globe, BrainCircuit, Briefcase, Cpu } from 'lucide-react';
+import { FileText, Target, MessageSquare, Mic, PhoneCall, Video, Activity, Map, BarChart as BarChartIcon, LineChart as LineChartIcon, Trophy, Bot, UserCheck, Building, Lightbulb, PenTool, Globe, BrainCircuit, Briefcase, BookOpen, Cpu } from 'lucide-react';
 
 export const COMPLETE_FEATURES = [
-  { title: "AI Resume Builder", description: "Generate ATS-friendly resumes optimized for your target roles in seconds.", icon: <FileText className="w-6 h-6 text-accent" />, href: "/dashboard/resume-builder" },
+  { title: "AI Resume Builder", description: "Generate ATS-friendly resumes optimized for your target roles in seconds.", icon: <FileText className="w-6 h-6 text-accent" />, href: "/dashboard/session" },
   { title: "Resume vs Job Matcher", description: "Upload job descriptions to precisely map your skill gaps and missing keywords.", icon: <Target className="w-6 h-6 text-accent" />, href: "/dashboard/feature/resume-vs-job-matcher" },
   { title: "AI Interview Q&A Generator", description: "Generate custom tailored questions and expert model answers for any role.", icon: <MessageSquare className="w-6 h-6 text-accent" />, href: "/dashboard/feature/ai-interview-q-a-generator" },
   { title: "Mock Interview Simulator", description: "Experience genuine speaking pressure with highly realistic conversational AI.", icon: <Mic className="w-6 h-6 text-accent" />, href: "/dashboard/session" },
   { title: "Voice-Based Interview", description: "Conduct hands-free, conversational phone-screen style interviews seamlessly.", icon: <PhoneCall className="w-6 h-6 text-accent" />, href: "/dashboard/feature/voice-based-interview" },
   { title: "AI Video Interview Analyzer", description: "Real-time analysis of your facial expressions, posture, and eye contact.", icon: <Video className="w-6 h-6 text-accent" />, href: "/dashboard/feature/ai-video-interview-analyzer" },
   { title: "Real-Time Speaking Coach", description: "Get instant live feedback on your pacing, filler words, and vocal tone.", icon: <Activity className="w-6 h-6 text-accent" />, href: "/dashboard/feature/real-time-speaking-coach" },
-  { title: "Study Concepts & Roadmap", description: "Receive personalized technical study plans tailored to your exact timeline.", icon: <Map className="w-6 h-6 text-accent" />, href: "/dashboard/feature/study-concepts-roadmap" },
+  { title: "AI Career Path Architect", description: "Generate a timeline-based roadmap charting your optimal professional trajectory.", icon: <Map className="w-6 h-6 text-accent" />, href: "/dashboard/career" },
+  { title: "Study Concepts & Roadmap", description: "Receive personalized technical study plans tailored to your exact timeline.", icon: <BookOpen className="w-6 h-6 text-accent" />, href: "/dashboard/study" },
   { title: "Skill Gap Analyzer", description: "Identify missing vital qualifications and discover resources to obtain them.", icon: <BarChartIcon className="w-6 h-6 text-accent" />, href: "/dashboard/feature/skill-gap-analyzer" },
-  { title: "Performance Dashboard", description: "Track your weaknesses and get actionable progress visualizations weekly.", icon: <LineChartIcon className="w-6 h-6 text-accent" />, href: "/dashboard/feature/performance-dashboard" },
+  { title: "Performance Dashboard", description: "Track your weaknesses and get actionable progress visualizations weekly.", icon: <LineChartIcon className="w-6 h-6 text-accent" />, href: "/dashboard" },
   { title: "Gamification System", description: "Earn XP, maintain daily prep streaks, and unlock badges to stay motivated.", icon: <Trophy className="w-6 h-6 text-accent" />, href: "/dashboard/feature/gamification-system" },
   { title: "AI Career Assistant Chatbot", description: "Ask any career or interview question and get expert, contextual advice 24/7.", icon: <Bot className="w-6 h-6 text-accent" />, href: "/dashboard/feature/ai-career-assistant-chatbot" },
   { title: "AI Mentor Mode", description: "Get guided, step-by-step coaching for difficult algorithms and concepts.", icon: <UserCheck className="w-6 h-6 text-accent" />, href: "/dashboard/feature/ai-mentor-mode" },

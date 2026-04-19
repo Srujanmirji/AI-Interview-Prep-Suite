@@ -17,6 +17,11 @@ export default function UnifiedDashboard() {
   const [lastName, setLastName] = useState('');
   const [role, setRole] = useState('');
   const [skills, setSkills] = useState('');
+  const [experience, setExperience] = useState('');
+  const [education, setEducation] = useState('');
+  const [linkedin, setLinkedin] = useState('');
+  const [github, setGithub] = useState('');
+  const [details, setDetails] = useState('');
   const [isGeneratingResume, setIsGeneratingResume] = useState(false);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +39,7 @@ export default function UnifiedDashboard() {
   const handleStartSession = () => {
     setFlowState('resume');
     setFirstName(''); setLastName(''); setRole(''); setSkills('');
+    setExperience(''); setEducation(''); setLinkedin(''); setGithub(''); setDetails('');
     setResumeResult(null);
     setInterviewStep(0);
     setCurrentQuestion("Click 'Start Interview' to begin.");
@@ -49,7 +55,7 @@ export default function UnifiedDashboard() {
       const res = await fetch('/api/resume/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, role, experience: "Draft experience based on role", skills })
+        body: JSON.stringify({ firstName, lastName, role, experience: experience || "Draft experience based on role", skills, education, linkedin, github, details })
       });
       const data = await res.json();
       if (!data.error) {
@@ -193,6 +199,13 @@ export default function UnifiedDashboard() {
       doc.setTextColor(100);
       doc.text((resumeResult.role || 'Not specified').toUpperCase(), 20, 42);
 
+      if (resumeResult.linkedin && resumeResult.linkedin !== "Not specified.") {
+         doc.setFont("helvetica", "italic");
+         doc.setFontSize(10);
+         doc.setTextColor(80, 100, 200);
+         doc.text(resumeResult.linkedin, 20, 48);
+      }
+
       // Skills Section
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
@@ -246,6 +259,49 @@ export default function UnifiedDashboard() {
                 yPos += (bulletLines.length * 5) + 3;
            }
            yPos += 6; // Spacing between jobs
+        });
+      }
+
+      // Education Section
+      if (resumeResult.education) {
+        if (yPos > 270) { doc.addPage(); yPos = 25; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(0);
+        doc.text("EDUCATION", 20, yPos);
+        yPos += 8;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.setTextColor(50);
+        const eduLines = doc.splitTextToSize(resumeResult.education, 170);
+        doc.text(eduLines, 20, yPos);
+        yPos += (eduLines.length * 6) + 6;
+      }
+
+      // Projects Section
+      if (resumeResult.projects && Array.isArray(resumeResult.projects) && resumeResult.projects.length > 0) {
+        if (yPos > 270) { doc.addPage(); yPos = 25; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(0);
+        doc.text("KEY PROJECTS", 20, yPos);
+        yPos += 10;
+
+        resumeResult.projects.forEach((proj: any) => {
+           if (yPos > 270) { doc.addPage(); yPos = 25; }
+           doc.setFont("helvetica", "bold");
+           doc.setFontSize(12);
+           doc.setTextColor(20);
+           doc.text(`${proj.title || 'Project'}`, 20, yPos);
+           yPos += 6;
+
+           doc.setFont("helvetica", "normal");
+           doc.setFontSize(10);
+           doc.setTextColor(60);
+           const projLines = doc.splitTextToSize(proj.description || '', 165);
+           doc.text(projLines, 25, yPos);
+           yPos += (projLines.length * 5) + 6;
         });
       }
 
@@ -318,10 +374,23 @@ export default function UnifiedDashboard() {
               {!resumeResult ? (
                 <form onSubmit={handleGenerateResume} className="space-y-5 flex-1 flex flex-col">
                   <div className="space-y-4 flex-1">
-                    <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} disabled={flowState !== 'resume'} placeholder="First Name" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
-                    <input type="text" required value={lastName} onChange={e => setLastName(e.target.value)} disabled={flowState !== 'resume'} placeholder="Last Name" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
+                    <div className="flex gap-4">
+                      <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} disabled={flowState !== 'resume'} placeholder="First Name" className="w-1/2 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
+                      <input type="text" required value={lastName} onChange={e => setLastName(e.target.value)} disabled={flowState !== 'resume'} placeholder="Last Name" className="w-1/2 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
+                    </div>
                     <input type="text" required value={role} onChange={e => setRole(e.target.value)} disabled={flowState !== 'resume'} placeholder="Target Role (e.g. Frontend Engineer)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
-                    <textarea rows={3} required value={skills} onChange={e => setSkills(e.target.value)} disabled={flowState !== 'resume'} placeholder="Skills (React, Node, etc.)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 resize-none disabled:opacity-50" />
+                    
+                    <div className="flex gap-4">
+                      <input type="text" value={experience} onChange={e => setExperience(e.target.value)} disabled={flowState !== 'resume'} placeholder="Experience (Yrs)" className="w-1/3 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
+                      <input type="text" value={education} onChange={e => setEducation(e.target.value)} disabled={flowState !== 'resume'} placeholder="Education (e.g. BS CS)" className="w-2/3 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
+                    </div>
+                    
+                    <div className="flex gap-4">
+                      <input type="text" value={linkedin} onChange={e => setLinkedin(e.target.value)} disabled={flowState !== 'resume'} placeholder="LinkedIn Username/URL" className="w-1/2 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
+                      <input type="text" value={github} onChange={e => setGithub(e.target.value)} disabled={flowState !== 'resume'} placeholder="GitHub Username" className="w-1/2 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 disabled:opacity-50" />
+                    </div>
+                    <textarea rows={2} required value={skills} onChange={e => setSkills(e.target.value)} disabled={flowState !== 'resume'} placeholder="Skills (React, Node, etc.)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 resize-none disabled:opacity-50" />
+                    <textarea rows={3} value={details} onChange={e => setDetails(e.target.value)} disabled={flowState !== 'resume'} placeholder="Important details, gaps, specific tools or projects..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-white placeholder:text-white/30 resize-none disabled:opacity-50" />
                   </div>
                   <div className="space-y-3 mt-4">
                     <button type="submit" disabled={flowState !== 'resume' || isGeneratingResume} className="w-full bg-accent text-white py-3 rounded-xl font-medium hover:bg-accent/90 transition-colors flex justify-center items-center gap-2 disabled:opacity-50 group">
@@ -349,8 +418,10 @@ export default function UnifiedDashboard() {
                     <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">{resumeResult.role}</p>
                     <div className="space-y-2 text-xs text-gray-700">
                       <p><strong>Skills:</strong> {Array.isArray(resumeResult.skills) ? resumeResult.skills.join(', ') : resumeResult.skills}</p>
+                      {resumeResult.education && <p><strong>Education:</strong> {resumeResult.education}</p>}
                       <p><strong>Experience:</strong> {resumeResult.experience?.[0]?.title} at {resumeResult.experience?.[0]?.company}</p>
-                      <p className="line-clamp-3 italic text-gray-500 text-[10px]">Preview truncated. Download to see full optimized details.</p>
+                      {resumeResult.linkedin && resumeResult.linkedin !== "Not specified." && <p><strong>LinkedIn:</strong> <span className="text-blue-500 underline">{resumeResult.linkedin}</span></p>}
+                      <p className="line-clamp-3 italic text-gray-500 text-[10px] mt-2">Preview truncated. Download to see full optimized details.</p>
                     </div>
                   </div>
                   <div className="mt-6 flex justify-between items-center">

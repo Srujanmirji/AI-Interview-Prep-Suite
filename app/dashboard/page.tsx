@@ -272,6 +272,28 @@ export default function AnalyticsDashboard() {
          </div>
       </motion.div>
 
+      {/* 8. EXPLORE ALL AI FEATURES */}
+      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{delay:1.2}} className="space-y-6 pt-4 border-t border-white/5">
+         <h2 className="text-2xl font-display text-white mb-6">Explore All AI Features</h2>
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {COMPLETE_FEATURES.map((feat, i) => (
+               <Link 
+                 key={i} 
+                 href={feat.href} 
+                 className="group liquid-glass p-5 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-accent/30 transition-all flex flex-col gap-4 min-h-[160px]"
+               >
+                 <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-accent/20 transition-colors border border-white/5">
+                   {feat.icon}
+                 </div>
+                 <div>
+                   <h3 className="font-medium text-white mb-1 text-sm">{feat.title}</h3>
+                   <p className="text-xs text-white/50 leading-relaxed line-clamp-3">{feat.description}</p>
+                 </div>
+               </Link>
+            ))}
+         </div>
+      </motion.div>
+
     </div>
   );
 }

@@ -1,7 +1,5 @@
 'use server';
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
 export async function generateContent(prompt: string, systemInstruction?: string) {
   try {
     const groqApiKey = process.env.GROQ_API_KEY || "";
